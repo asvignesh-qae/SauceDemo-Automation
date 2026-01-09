@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx playwright --version)",
+      "Bash(npx playwright run-test-mcp-server:*)",
+      "Bash(node --version:*)",
+      "Bash(npx:*)",
+      "Bash(dir:*)",
+      "Bash(npm run test:all:chromium:*)",
+      "Bash(npm run test:checkout:firefox:*)",
+      "Bash(npm run test:cart:webkit:*)"
+    ]
+  }
+}
