@@ -10,5 +10,7 @@
       "Bash(npm run test:checkout:firefox:*)",
       "Bash(npm run test:cart:webkit:*)"
     ]
-  }
+  },
+  "enabledMcpjsonServers": ["playwright-test"],
+  "enableAllProjectMcpServers": true
 }

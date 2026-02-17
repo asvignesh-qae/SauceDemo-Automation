@@ -1,5 +1,7 @@
 # SauceDemo Automation Framework
 
+![CI](https://github.com/asvignesh-qae/SauceDemo-Automation/actions/workflows/playwright.yml/badge.svg)
+
 A modern, maintainable test automation framework for SauceDemo using **Playwright** and **TypeScript**.
 
 ## 📋 Table of Contents
@@ -246,7 +248,7 @@ Ensure you have the following installed:
 ### 1. Clone the Repository
 
 ```bash
-git clone [<repository-url>](https://github.com/asvignesh-qae/TulipTakeHome.git)
+git clone [<repository-url>](https://github.com/asvignesh-qae/SauceDemo-Automation.git)
 ```
 
 ### 2. Install Dependencies
@@ -454,7 +456,7 @@ npx playwright show-report
 ## 📂 Project Structure
 
 ```
-TulipTakeHome/
+SauceDemo-Automation/
 ├── .env                           # Environment variables (credentials)
 ├── .env.example                   # Template for environment variables
 ├── .gitignore                     # Git ignore rules
