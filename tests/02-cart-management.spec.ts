@@ -24,7 +24,7 @@ test.describe("Cart Management", () => {
     });
 
     await test.step("User verifies that the cart has the correct number of items", async () => {
-      let cartCount = await pm.onInventoryPage().getCartItemCount();
+      const cartCount = await pm.onInventoryPage().getCartItemCount();
       expect(cartCount).toBe(itemsToAdd.length);
     });
 
@@ -47,12 +47,12 @@ test.describe("Cart Management", () => {
     });
 
     await test.step("User verifies that the cart has the correct number of items", async () => {
-      let itemCountAfterRemoval = await pm.onCartPage().getCartItemCount();
+      const itemCountAfterRemoval = await pm.onCartPage().getCartItemCount();
       expect(itemCountAfterRemoval).toBe(itemsToAdd.length - 1);
     });
 
     await test.step("User verifies that the cart badge reflects new count", async () => {
-      let badgeCount = await pm.onCartPage().getCartBadgeCount();
+      const badgeCount = await pm.onCartPage().getCartBadgeCount();
       expect(badgeCount).toBe(itemsToAdd.length - 1);
     });
 

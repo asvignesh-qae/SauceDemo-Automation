@@ -59,7 +59,7 @@ test.describe("Successfully purchase of the items", () => {
       await pm.onCheckoutStepTwoPage().validateIfOnCheckoutStepTwoPage();
     });
 
-    await test.step("User validates the checkout Step Two Page", async () => {
+    await test.step("User validates PaymentAndShippingInfo and Total Amounts in checkout Step Two Page", async () => {
       await pm.onCheckoutStepTwoPage().validatePaymentAndShippingInfo();
       await pm.onCheckoutStepTwoPage().validateTotalAmounts();
     });

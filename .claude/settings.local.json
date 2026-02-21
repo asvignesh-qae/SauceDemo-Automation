@@ -8,9 +8,12 @@
       "Bash(dir:*)",
       "Bash(npm run test:all:chromium:*)",
       "Bash(npm run test:checkout:firefox:*)",
-      "Bash(npm run test:cart:webkit:*)"
+      "Bash(npm run test:cart:webkit:*)",
+      "WebFetch(domain:github.com)"
     ]
   },
-  "enabledMcpjsonServers": ["playwright-test"],
-  "enableAllProjectMcpServers": true
+  "enableAllProjectMcpServers": true,
+  "enabledMcpjsonServers": [
+    "playwright-test"
+  ]
 }

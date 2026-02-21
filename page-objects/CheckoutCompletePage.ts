@@ -33,12 +33,9 @@ export class CheckoutCompletePage extends AbstractPage{
   }
   
   async validateSuccessfulPurchase(): Promise<void> {
-    expect(await this.isOrderCompleteVisible()).toBeTruthy();
-    expect(await this.isOrderCompleteTextVisible()).toBeTruthy();
+    await expect(this.completeHeader).toBeVisible();
+    await expect(this.completeText).toBeVisible();
     await expect(this.completeHeader).toHaveText("Thank you for your order!");
-    let dispatchConfirmationMessage = await this.completeText.textContent();
-    expect(dispatchConfirmationMessage).toMatch(
-      /Your order has been dispatched/
-    );
+    await expect(this.completeText).toContainText("Your order has been dispatched");
   }
 }

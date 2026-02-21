@@ -1,16 +1,18 @@
 import dotenv from "dotenv";
 
-// Only load .env file when running locally (not in CI)
 if (!process.env.CI) {
   dotenv.config();
-  console.log("Loading credentials from .env file (local environment)");
-} else {
-  console.log("Using credentials from environment variables (CI environment)");
+}
+
+const username = process.env.STANDARD_USER_USERNAME;
+const password = process.env.STANDARD_USER_PASSWORD;
+
+if (!username || !password) {
+  throw new Error(
+    "Missing credentials: STANDARD_USER_USERNAME and STANDARD_USER_PASSWORD must be set in .env (local) or as environment variables (CI)"
+  );
 }
 
 export const credentials = {
-  standardUser: {
-    username: process.env.STANDARD_USER_USERNAME || "",
-    password: process.env.STANDARD_USER_PASSWORD || "",
-  },
+  standardUser: { username, password },
 };

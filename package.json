@@ -38,6 +38,12 @@
     "test:all:firefox:headed": "npx playwright test --project=firefox --headed",
     "test:all:webkit": "npx playwright test --project=webkit",
     "test:all:webkit:headed": "npx playwright test --project=webkit --headed",
+    "test:all:browsers": "npx playwright test --project=chromium --project=firefox --project=webkit",
+    "test:all:browsers:headed": "npx playwright test --project=chromium --project=firefox --project=webkit --headed",
+    "//a11y": "--- Accessibility Audit ---",
+    "test:a11y": "npx playwright test --project=\"accessibility\"",
+    "test:a11y:headed": "npx playwright test --project=\"accessibility\" --headed",
+    "test:a11y:report": "npx playwright test --project=\"accessibility\" && npx playwright show-report html-report",
     "playwright:ui": "npx playwright test --ui",
     "playwright:report": "npx playwright show-report"
   },
@@ -46,8 +52,10 @@
   "license": "ISC",
   "type": "commonjs",
   "devDependencies": {
+    "@axe-core/playwright": "^4.11.1",
     "@playwright/test": "^1.57.0",
     "@types/node": "^25.0.3",
+    "axe-html-reporter": "^2.2.11",
     "dotenv": "^17.2.3",
     "typescript": "^5.9.3"
   }

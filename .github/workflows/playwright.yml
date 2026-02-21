@@ -43,7 +43,7 @@ jobs:
         run: npx playwright install --with-deps
 
       - name: Run Playwright tests (shard ${{ matrix.shard }}/4)
-        run: npx playwright test --shard=${{ matrix.shard }}/4 --reporter=blob
+        run: npx playwright test --project=chromium --project=firefox --project=webkit --shard=${{ matrix.shard }}/4 --reporter=blob
         env:
           STANDARD_USER_USERNAME: ${{ secrets.STANDARD_USER_USERNAME }}
           STANDARD_USER_PASSWORD: ${{ secrets.STANDARD_USER_PASSWORD }}
@@ -52,13 +52,43 @@ jobs:
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: blob-report-${{ matrix.shard }}
+          name: ui-blob-report-${{ matrix.shard }}
+          path: blob-report/
+          retention-days: 1
+
+  accessibility:
+    name: Run Accessibility Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Run Accessibility tests
+        run: npx playwright test --project=accessibility --reporter=blob
+
+      - name: Upload blob report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: a11y-blob-report
           path: blob-report/
           retention-days: 1
 
   merge-and-deploy:
     name: Merge Reports & Deploy to GitHub Pages
-    needs: test
+    needs: [test, accessibility]
     if: always()
     runs-on: ubuntu-latest
     environment:
@@ -76,30 +106,89 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Download all blob reports
+      # ── UI Report ──────────────────────────────────────────────────
+      - name: Download UI blob reports
         uses: actions/download-artifact@v4
         with:
-          path: all-blob-reports
-          pattern: blob-report-*
+          path: ui-blobs
+          pattern: ui-blob-report-*
           merge-multiple: true
 
-      - name: Merge into HTML report
-        run: npx playwright merge-reports --reporter html ./all-blob-reports
+      - name: Merge UI reports into HTML
+        run: |
+          npx playwright merge-reports --reporter html ./ui-blobs
+          mv playwright-report site/ui
 
-      - name: Upload HTML report as artifact (30-day retention)
+      # ── Accessibility Report ───────────────────────────────────────
+      - name: Download Accessibility blob report
+        uses: actions/download-artifact@v4
+        with:
+          name: a11y-blob-report
+          path: a11y-blobs
+
+      - name: Merge Accessibility report into HTML
+        run: |
+          npx playwright merge-reports --reporter html ./a11y-blobs
+          mv playwright-report site/a11y
+
+      # ── Landing page ───────────────────────────────────────────────
+      - name: Create index page
+        run: |
+          mkdir -p site
+          cat > site/index.html << 'EOF'
+          <!DOCTYPE html>
+          <html lang="en">
+          <head>
+            <meta charset="UTF-8" />
+            <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+            <title>Test Reports – SauceDemo Automation</title>
+            <style>
+              body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0d1117; color: #e6edf3; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; margin: 0; gap: 24px; }
+              h1 { font-size: 1.5rem; color: #58a6ff; margin: 0; }
+              p { color: #8b949e; margin: 0; font-size: 0.9rem; }
+              .cards { display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; }
+              a.card { display: flex; flex-direction: column; gap: 8px; padding: 24px 32px; border: 1px solid #30363d; border-radius: 12px; background: #161b22; color: #e6edf3; text-decoration: none; transition: border-color .2s, background .2s; min-width: 200px; text-align: center; }
+              a.card:hover { border-color: #58a6ff; background: #1c2128; }
+              a.card .icon { font-size: 2rem; }
+              a.card .label { font-weight: 600; font-size: 1rem; }
+              a.card .sub { font-size: 0.8rem; color: #8b949e; }
+            </style>
+          </head>
+          <body>
+            <h1>SauceDemo Automation — Test Reports</h1>
+            <p>Playwright Test Automation Framework</p>
+            <div class="cards">
+              <a class="card" href="./ui/">
+                <span class="icon"><img src="https://cdn.discordapp.com/emojis/1054714813638516757.webp?size=56" alt="Playwright" style="width:2rem;height:2rem;vertical-align:middle;" /></span>
+                <span class="label">UI Test Report</span>
+                <span class="sub">Chromium · Firefox · WebKit</span>
+              </a>
+              <a class="card" href="./a11y/">
+                <span class="icon">♿</span>
+                <span class="label">Accessibility Report</span>
+                <span class="sub">WCAG 2.1 AA · axe-core</span>
+              </a>
+            </div>
+          </body>
+          </html>
+          EOF
+
+      # ── Upload artifact (30-day retention) ─────────────────────────
+      - name: Upload HTML reports as artifact
         uses: actions/upload-artifact@v4
         with:
-          name: playwright-html-report
-          path: playwright-report/
+          name: playwright-html-reports
+          path: site/
           retention-days: 30
 
+      # ── Deploy to GitHub Pages ─────────────────────────────────────
       - name: Setup GitHub Pages
         uses: actions/configure-pages@v5
 
-      - name: Upload report to Pages
+      - name: Upload site to Pages
         uses: actions/upload-pages-artifact@v3
         with:
-          path: playwright-report/
+          path: site/
 
       - name: Deploy to GitHub Pages
         id: deployment

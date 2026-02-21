@@ -53,6 +53,9 @@ export default defineConfig({
    * - checkout-flow-firefox
    * - cart-management-firefox
    * - product-sorting-firefox
+   *
+   * Accessibility:
+   * - accessibility: WCAG 2.1 AA audit of vignesh-as.dev (axe-core + manual)
    */
   projects: [
     // ============================================
@@ -71,6 +74,7 @@ export default defineConfig({
         "**/test1.spec.ts",
         "**/tests/seed.spec.ts",
         "**/tests/authentication/**",
+        "**/tests/accessibility/**",
       ],
     },
     {
@@ -83,6 +87,7 @@ export default defineConfig({
         "**/test1.spec.ts",
         "**/tests/seed.spec.ts",
         "**/tests/authentication/**",
+        "**/tests/accessibility/**",
       ],
     },
     {
@@ -95,6 +100,7 @@ export default defineConfig({
         "**/test1.spec.ts",
         "**/tests/seed.spec.ts",
         "**/tests/authentication/**",
+        "**/tests/accessibility/**",
       ],
     },
 
@@ -202,6 +208,21 @@ export default defineConfig({
       use: {
         browserName: "webkit",
         viewport: { width: 1920, height: 1200 },
+      },
+    },
+
+    // ============================================
+    // Accessibility Audit (WCAG 2.1 AA)
+    // ============================================
+    {
+      name: "accessibility",
+      testMatch: "**/tests/accessibility/**/*.spec.ts",
+      use: {
+        browserName: "chromium",
+        viewport: { width: 1280, height: 800 },
+        // No baseURL — tests navigate to absolute URLs
+        baseURL: undefined,
+        trace: "on-first-retry",
       },
     },
   ],
