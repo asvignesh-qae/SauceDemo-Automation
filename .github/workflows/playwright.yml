@@ -116,8 +116,9 @@ jobs:
 
       - name: Merge UI reports into HTML
         run: |
+          mkdir -p site/ui
           npx playwright merge-reports --reporter html ./ui-blobs
-          mv playwright-report site/ui
+          mv playwright-report/* site/ui/
 
       # ── Accessibility Report ───────────────────────────────────────
       - name: Download Accessibility blob report
@@ -128,8 +129,9 @@ jobs:
 
       - name: Merge Accessibility report into HTML
         run: |
+          mkdir -p site/a11y
           npx playwright merge-reports --reporter html ./a11y-blobs
-          mv playwright-report site/a11y
+          mv playwright-report/* site/a11y/
 
       # ── Landing page ───────────────────────────────────────────────
       - name: Create index page
