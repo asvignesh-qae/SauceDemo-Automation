@@ -39,6 +39,7 @@ This automation framework implements three comprehensive test scenarios for the 
 7. ✅ **Detailed Reporting** - HTML and JSON reports with screenshots/videos
 8. ✅ **Reusable Fixtures** - Authenticated session fixture eliminates login boilerplate
 9. ✅ **AI-Powered Testing** - MCP agents for test planning, generation, and healing (see [MCP_TESTING.md](MCP_TESTING.md))
+10. ✅ **Accessibility Testing** - Integrated a11y testing using axe-core and Playwright for WCAG compliance
 
 ---
 
@@ -53,6 +54,7 @@ This framework strictly follows **SOLID principles** for clean, maintainable, an
 Each class and module has **ONE clearly defined responsibility**:
 
 **Page Objects** - Each handles only its specific page:
+
 - `LoginPage` → Login operations only
 - `InventoryPage` → Product listing and cart operations
 - `CartPage` → Shopping cart management
@@ -61,14 +63,17 @@ Each class and module has **ONE clearly defined responsibility**:
 - `CheckoutCompletePage` → Order completion verification
 
 **Utilities** - Separated by concern:
+
 - `credentials.ts` → Credential management only
 - `testData.ts` → Test data management only
 
 **Fixtures** - Each has specific purpose:
+
 - `page-fixture.ts` → Provides page and time logging
 - `auth-fixture.ts` → Provides authenticated session
 
 **Test Files** - Each focuses on single feature:
+
 - `01-checkout.spec.ts` → Purchase flow only
 - `02-cart-management.spec.ts` → Cart operations only
 - `03-product-sorting.spec.ts` → Sorting functionality only
@@ -82,6 +87,7 @@ Each class and module has **ONE clearly defined responsibility**:
 Classes are **open for extension, closed for modification**:
 
 **AbstractPage Base Methods**:
+
 ```typescript
 // AbstractPage provides extensible base functionality
 protected async validatePage(
@@ -96,6 +102,7 @@ protected async getBadgeCount(
 ```
 
 **Page Objects Extend Without Modifying**:
+
 ```typescript
 // LoginPage extends functionality without modifying AbstractPage
 export class LoginPage extends AbstractPage {
@@ -106,12 +113,13 @@ export class LoginPage extends AbstractPage {
 ```
 
 **Fixture Extension**:
+
 ```typescript
 // auth-fixture extends page-fixture without modifying it
 export const test = base.extend<AuthFixtures>({
   authenticatedPage: async ({ pmPage }, use) => {
     // New functionality added via extension
-  }
+  },
 });
 ```
 
@@ -124,19 +132,21 @@ export const test = base.extend<AuthFixtures>({
 **Child classes properly substitute parent classes**:
 
 All page objects extend `AbstractPage` and can be used interchangeably:
+
 ```typescript
 // Any page object can substitute AbstractPage
-export class LoginPage extends AbstractPage { }
-export class InventoryPage extends AbstractPage { }
-export class CartPage extends AbstractPage { }
+export class LoginPage extends AbstractPage {}
+export class InventoryPage extends AbstractPage {}
+export class CartPage extends AbstractPage {}
 
 // All inherit the same 'page' property and methods
 function navigatePage(pageObject: AbstractPage) {
-  pageObject.page.goto('/url'); // Works for ALL page objects
+  pageObject.page.goto("/url"); // Works for ALL page objects
 }
 ```
 
 **Key Benefits**:
+
 - All page objects share common `page` property from AbstractPage
 - All can use `validatePage()` and `getBadgeCount()` methods
 - No broken contracts or unexpected behavior
@@ -161,6 +171,7 @@ await pm.onCartPage().proceedToCheckout();
 ```
 
 Tests don't directly create page objects:
+
 ```typescript
 // Good - using abstraction
 await pm.onLoginPage().login(username, password);
@@ -207,14 +218,14 @@ Centralized credential and test data management:
 
 ### Architecture Summary
 
-| Principle | Compliance | Key Implementation |
-|-----------|------------|-------------------|
-| **Single Responsibility** | ✅ 95% | Each class has one clear purpose |
-| **Open/Closed** | ✅ 85% | AbstractPage enables extension without modification |
-| **Liskov Substitution** | ✅ 95% | Proper inheritance hierarchy, all page objects extend AbstractPage |
-
+| Principle                 | Compliance | Key Implementation                                                 |
+| ------------------------- | ---------- | ------------------------------------------------------------------ |
+| **Single Responsibility** | ✅ 95%     | Each class has one clear purpose                                   |
+| **Open/Closed**           | ✅ 85%     | AbstractPage enables extension without modification                |
+| **Liskov Substitution**   | ✅ 95%     | Proper inheritance hierarchy, all page objects extend AbstractPage |
 
 **Key Strengths**:
+
 - ✅ Clean separation of concerns across all modules
 - ✅ Proper inheritance hierarchy eliminates code duplication
 - ✅ Extensible architecture via base class methods
@@ -287,6 +298,7 @@ cp .env.example .env
 STANDARD_USER_USERNAME=username
 STANDARD_USER_PASSWORD=password
 ```
+
 Now replace the username and password with the intended credentials
 
 > **Security Note**: Never commit `.env` to version control. It's already in `.gitignore`.
@@ -335,6 +347,14 @@ npm run test:all:webkit:headed     # WebKit with visible browser
 npm run test:all:chromium   # Chromium browser hidden
 npm run test:all:firefox    # Firefox browser hidden
 npm run test:all:webkit     # WebKit browser hidden
+```
+
+### Run Accessibility Tests
+
+```bash
+npm run test:a11y                # Run in headless mode
+npm run test:a11y:headed         # Run with visible browser
+npm run test:a11y:report         # Run and show the HTML report
 ```
 
 ### Run Individual Feature Tests
@@ -453,6 +473,23 @@ npx playwright show-report
 
 ---
 
+### Test 4: Accessibility Audit (`accessibility/vignesh-as-dev-a11y.spec.ts`)
+
+**Objective**: Verify the accessibility of https://vignesh-as.dev against WCAG 2.1 Level A & AA guidelines.
+
+**Key Suites**:
+
+1. **Automated axe-core Scan**: Reports all violations, fails on critical/serious.
+2. **Page Structure**: Validates landmarks, headings, and language.
+3. **Navigation & Focus**: Checks ARIA labels, focus states, and tab order.
+4. **Images & Media**: Verifies descriptive alt text.
+5. **Forms**: Ensures inputs and buttons are properly labeled and reachable.
+6. **Responsive / Reflow**: Tests content reflow at 320px and 375px without horizontal scroll.
+
+**Expected Result**: Generates a detailed accessibility report and ensures compliance with WCAG standards.
+
+---
+
 ## 📂 Project Structure
 
 ```
@@ -552,6 +589,7 @@ This framework strictly adheres to **SOLID principles** for maintainable, scalab
 See [Architecture > SOLID Principles](#solid-principles) for comprehensive implementation details.
 
 **Additional Clean Code Practices**:
+
 - **Descriptive Naming**: Clear, self-documenting method and variable names
 - **DRY (Don't Repeat Yourself)**: Reusable page objects, fixtures, and utilities
 - **Facade Pattern**: `PageManager` provides unified access to all page objects
