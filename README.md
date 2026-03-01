@@ -529,6 +529,8 @@ SauceDemo-Automation/
 │   ├── 02-cart-management.spec.ts # Cart management tests
 │   ├── 03-product-sorting.spec.ts # Product sorting tests
 │   ├── seed.spec.ts               # Seed file for agent-based testing
+│   ├── accessibility/             # Accessibility testing suite
+│   │   └── vignesh-as-dev-a11y.spec.ts
 │   └── authentication/            # Authentication test suite
 │       └── login-standard-user.spec.ts
 │
@@ -623,9 +625,17 @@ on:
   pull_request:
     branches: [main, master]
   schedule:
-    # Runs every 8 hours at minute 0 (00:00, 08:00, 16:00, 24:00 UTC)
     - cron: "0 */8 * * *"
-  workflow_dispatch: # Allows manual triggering from GitHub Actions UI
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
 
 jobs:
   test:
@@ -634,61 +644,64 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        shardIndex: [1, 2, 3, 4]
-        shardTotal: [4]
+        shard: [1, 2, 3, 4]
     steps:
       - uses: actions/checkout@v4
 
       - uses: actions/setup-node@v4
         with:
-          node-version: lts/*
+          node-version: 20
           cache: "npm"
 
       - name: Install dependencies
         run: npm ci
 
-      - name: Cache Playwright Browsers
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/ms-playwright
-          key: ${{ runner.os }}-playwright-${{ hashFiles('**/package-lock.json') }}
-
-      - name: Install Playwright Browsers
+      - name: Install Playwright browsers
         run: npx playwright install --with-deps
 
-      - name: Run Playwright tests
-        run: npx playwright test --project=chromium --project=firefox --project=webkit --project=test1 --shard=${{ matrix.shardIndex }}/${{ matrix.shardTotal }}
+      - name: Run Playwright tests (shard ${{ matrix.shard }}/4)
+        run: npx playwright test --project=chromium --project=firefox --project=webkit --shard=${{ matrix.shard }}/4 --reporter=blob
         env:
-          CI: true
+          STANDARD_USER_USERNAME: ${{ secrets.STANDARD_USER_USERNAME }}
+          STANDARD_USER_PASSWORD: ${{ secrets.STANDARD_USER_PASSWORD }}
 
-      - name: Upload test results
-        if: ${{ !cancelled() }}
+      - name: Upload blob report
         uses: actions/upload-artifact@v4
+        if: always()
         with:
-          name: test-results-${{ matrix.shardIndex }}
-          path: test-results/
+          name: ui-blob-report-${{ matrix.shard }}
+          path: blob-report/
+          retention-days: 1
 
-  merge-reports:
-    if: ${{ !cancelled() }}
-    needs: [test]
+  accessibility:
+    name: Run Accessibility Tests
     runs-on: ubuntu-latest
+    timeout-minutes: 60
+
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-node@v4
-      - run: npm ci
-      - name: Download blob reports
-        uses: actions/download-artifact@v4
         with:
-          pattern: blob-report-*
-          merge-multiple: true
-      - name: Merge into HTML Report
-        run: npx playwright merge-reports --reporter html ./all-blob-reports
-      - name: Upload HTML report
+          node-version: 20
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Run Accessibility tests
+        run: npx playwright test --project=accessibility --reporter=blob
+
+      - name: Upload blob report
         uses: actions/upload-artifact@v4
+        if: always()
         with:
-          name: playwright-report
-          path: playwright-report/
-          retention-days: 30
+          name: a11y-blob-report
+          path: blob-report/
+          retention-days: 1
 ```
 
 #### Workflow Triggers:
@@ -720,7 +733,17 @@ Store credentials as GitHub Secrets:
 
 ## 📊 Test Reports
 
-After running tests, view the HTML report:
+### 🌐 Live CI/CD Reports (GitHub Pages)
+
+The latest test reports are automatically published to GitHub Pages on every successful run:
+
+- **[Main Report Dashboard](https://asvignesh-qae.github.io/SauceDemo-Automation/)**
+- **[UI Test Report (Chromium, Firefox, WebKit)](https://asvignesh-qae.github.io/SauceDemo-Automation/ui/)**
+- **[Accessibility Audit Report (WCAG 2.1 AA)](https://asvignesh-qae.github.io/SauceDemo-Automation/a11y/)**
+
+### Local Reports
+
+After running tests locally, view the HTML report:
 
 ```bash
 npx playwright show-report
@@ -741,12 +764,13 @@ To view a specific test trace:
 npx playwright show-trace test-results/<test-name>/trace.zip
 ```
 
-### Report Locations
+### Report Artifact Locations
 
 - **Local runs**: `html-report/` (opens automatically)
 - **CI runs**: Download from GitHub Actions artifacts
-  - Individual shard results: `test-results-1`, `test-results-2`, etc.
-  - Merged HTML report: `playwright-report` (retained for 30 days)
+  - Individual UI shard results: `ui-blob-report-1`, `ui-blob-report-2`, etc.
+  - Accessibility report: `a11y-blob-report`
+  - Deploys as GitHub Pages artifacts
 
 ---
 
