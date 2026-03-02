@@ -15,7 +15,7 @@ A modern, maintainable test automation framework for SauceDemo using **Playwrigh
 - [Test Cases](#test-cases)
 - [Project Structure](#project-structure)
 - [Best Practices](#best-practices)
-- [CI/CD Integration](#cicd-integration)
+- [CI/CD Integration](#-cicd-integration)
 - [Test Reports](#-test-reports)
 - [AI-Powered Testing with MCP](MCP_TESTING.md) 🤖
 
