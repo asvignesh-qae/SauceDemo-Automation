@@ -17,6 +17,7 @@ A modern, maintainable test automation framework for SauceDemo using **Playwrigh
 - [Best Practices](#best-practices)
 - [CI/CD Integration](#-cicd-integration)
 - [Test Reports](#-test-reports)
+- [Test Reporting Architecture](#test-reporting-architecture)
 - [AI-Powered Testing with MCP](MCP_TESTING.md) 🤖
 
 ---
@@ -233,6 +234,64 @@ Centralized credential and test data management:
 - ✅ Extensible architecture via base class methods
 - ✅ Fixture-based dependency injection for tests
 - ✅ ~150+ lines of duplicate code eliminated through refactoring
+
+---
+
+### Test Reporting Architecture
+
+The framework supports multiple environments for test execution and report generation.
+
+```mermaid
+graph TD
+    classDef execute fill:#1a6bb5,stroke:#5bc8f5,stroke-width:3px,color:#ffffff,font-weight:bold;
+    classDef browser fill:#1a7a4a,stroke:#4cde8a,stroke-width:3px,color:#ffffff,font-weight:bold;
+    classDef reports fill:#7b2fa8,stroke:#d98ef5,stroke-width:3px,color:#ffffff,font-weight:bold;
+    classDef platform fill:#c45c0a,stroke:#ffb347,stroke-width:3px,color:#ffffff,font-weight:bold;
+
+    Local[🖥️ Local Machine]:::platform
+    CI[⚙️ GitHub Actions]:::platform
+
+    subgraph Execution["🚀 Execution"]
+        Playwright[🎭 Playwright Test Runner]:::execute
+        Local --> Playwright
+        CI --> Playwright
+
+        UI_Tests[🧪 SauceDemo UI Tests]:::browser
+        A11y_Tests[♿ Accessibility Tests]:::browser
+
+        Playwright --> UI_Tests
+        Playwright --> A11y_Tests
+    end
+
+    subgraph Reporting_Local["📋 Local Reporting"]
+        HTML_Local[🌐 HTML Report]:::reports
+        JSON_Local[📄 JSON Results]:::reports
+        Terminal[💻 Terminal Output]:::reports
+
+        UI_Tests -.-> HTML_Local
+        UI_Tests -.-> JSON_Local
+        UI_Tests -.-> Terminal
+        A11y_Tests -.-> HTML_Local
+    end
+
+    subgraph Reporting_CI["☁️ CI Reporting"]
+        Blob_UI[📦 UI Blob Reports]:::reports
+        Blob_A11y[📦 A11y Blob Report]:::reports
+        Merge_Job[🔀 Merge Reports Job]:::execute
+
+        UI_Tests --> Blob_UI
+        A11y_Tests --> Blob_A11y
+
+        Blob_UI --> Merge_Job
+        Blob_A11y --> Merge_Job
+
+        HTML_CI[📊 Combined HTML Report]:::reports
+        GHPages[🌍 GitHub Pages]:::platform
+
+        Merge_Job --> HTML_CI
+        HTML_CI --> GHPages
+    end
+```
 
 ---
 
