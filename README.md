@@ -16,6 +16,7 @@ A modern, maintainable test automation framework for SauceDemo using **Playwrigh
 - [Project Structure](#project-structure)
 - [Best Practices](#best-practices)
 - [CI/CD Integration](#cicd-integration)
+- [Test Reports](#-test-reports)
 - [AI-Powered Testing with MCP](MCP_TESTING.md) 🤖
 
 ---
@@ -77,6 +78,7 @@ Each class and module has **ONE clearly defined responsibility**:
 - `01-checkout.spec.ts` → Purchase flow only
 - `02-cart-management.spec.ts` → Cart operations only
 - `03-product-sorting.spec.ts` → Sorting functionality only
+- `04-vignesh-as-dev-a11y.spec.ts` → Accessibility audit on https://vignesh-as.dev page
 
 **Benefits**: Easy maintenance, clear code organization, minimal impact from changes
 
@@ -240,6 +242,7 @@ Centralized credential and test data management:
 - **TypeScript**: ^5.6.0
 - **Node.js**: 18+ (recommended)
 - **dotenv**: Environment variable management
+- **axe-core/playwright**: Accessibility (a11y) testing engine
 - **MCP (Model Context Protocol)**: AI-powered test development with Claude agents - [Learn more](MCP_TESTING.md)
 
 ---
@@ -530,7 +533,7 @@ SauceDemo-Automation/
 │   ├── 03-product-sorting.spec.ts # Product sorting tests
 │   ├── seed.spec.ts               # Seed file for agent-based testing
 │   ├── accessibility/             # Accessibility testing suite
-│   │   └── vignesh-as-dev-a11y.spec.ts
+│   │   └── vignesh-as-dev-a11y.spec.ts # axe-core accessibility audit tests
 │   └── authentication/            # Authentication test suite
 │       └── login-standard-user.spec.ts
 │
