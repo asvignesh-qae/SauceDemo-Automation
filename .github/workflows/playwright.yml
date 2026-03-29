@@ -54,7 +54,7 @@ jobs:
         with:
           name: ui-blob-report-${{ matrix.shard }}
           path: blob-report/
-          retention-days: 1
+          retention-days: 5
 
   accessibility:
     name: Run Accessibility Tests
@@ -181,7 +181,7 @@ jobs:
         with:
           name: playwright-html-reports
           path: site/
-          retention-days: 30
+          retention-days: 5
 
       # ── Deploy to GitHub Pages ─────────────────────────────────────
       - name: Setup GitHub Pages
